@@ -136,7 +136,3 @@ services:
 networks:
   dokploy-network:
     external: true
-
-volumes:
-  # All volumes are handled by Dokploy's ../files/ structure
-  # No need to define them here as they're bind mounts
