@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Intervo Dokploy Deployment Script
-# This script helps prepare and deploy Intervo to Dokploy
+# Intervo Open Source Dokploy Deployment Script
+# This script helps prepare and deploy Intervo Open Source to Dokploy
+# Based on: https://docs.intervo.ai/open-source/setup
 
 set -e  # Exit on any error
 
@@ -51,28 +52,47 @@ check_prerequisites() {
     print_success "Prerequisites check passed"
 }
 
-# Setup environment file
+# Setup environment files
 setup_environment() {
-    print_status "Setting up environment file..."
-    
+    print_status "Setting up environment files..."
+
+    # Backend environment
     if [ ! -f ".env.production" ]; then
         if [ -f ".env.production.example" ]; then
             cp .env.production.example .env.production
             print_warning "Created .env.production from template. Please edit it with your actual values."
-            print_warning "You MUST update the following before deployment:"
-            echo "  - Replace 'yourdomain.com' with your actual domain"
-            echo "  - Add your API keys (OpenAI, Twilio, etc.)"
-            echo "  - Set secure JWT and session secrets"
-            echo "  - Configure database credentials"
-            echo ""
-            read -p "Press Enter after you've updated .env.production..."
         else
             print_error ".env.production.example not found. Please create environment file manually."
             exit 1
         fi
     else
-        print_success "Environment file already exists"
+        print_success "Backend environment file already exists"
     fi
+
+    # Frontend environment
+    if [ ! -f "Intervo/packages/intervo-frontend/.env.production" ]; then
+        print_warning "Frontend .env.production not found. Creating from template..."
+        cat > Intervo/packages/intervo-frontend/.env.production << EOF
+NODE_ENV=production
+NEXT_PUBLIC_API_URL_PRODUCTION=https://api.yourdomain.com
+EOF
+    fi
+
+    # Widget environment
+    if [ ! -f "Intervo/packages/intervo-widget/.env.production" ]; then
+        print_warning "Widget .env.production not found. Creating from template..."
+        cat > Intervo/packages/intervo-widget/.env.production << EOF
+VITE_API_URL_PRODUCTION=https://api.yourdomain.com
+EOF
+    fi
+
+    print_warning "You MUST update the following before deployment:"
+    echo "  - Replace 'yourdomain.com' with your actual domain in ALL environment files"
+    echo "  - Add your API keys (OpenAI, Twilio, etc.) in .env.production"
+    echo "  - Set secure JWT and session secrets (minimum 32 characters)"
+    echo "  - Configure database credentials if needed"
+    echo ""
+    read -p "Press Enter after you've updated all environment files..."
 }
 
 # Validate environment file
@@ -90,8 +110,8 @@ validate_environment() {
         exit 1
     fi
     
-    # Check for required variables
-    required_vars=("JWT_SECRET" "MONGO_URI" "NEXTAUTH_SECRET")
+    # Check for required variables (based on open source documentation)
+    required_vars=("SESSION_SECRET" "NEXTAUTH_SECRET" "ENCRYPTION_KEY" "MONGO_URI")
     for var in "${required_vars[@]}"; do
         if ! grep -q "^${var}=" .env.production || grep -q "^${var}=$" .env.production; then
             print_error "Required variable ${var} is not set in .env.production"

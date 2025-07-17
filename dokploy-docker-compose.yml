@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # MongoDB Database
   mongodb:
@@ -16,15 +14,15 @@ services:
 
   # Frontend (Next.js)
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend.prod
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ../files/node_modules:/app/node_modules
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://api.yourdomain.com
-      - NEXT_PUBLIC_RAG_API_URL=https://rag.yourdomain.com
-    volumes:
-      - ../files/frontend_cache:/app/.next/cache
+      - NEXT_PUBLIC_API_URL_PRODUCTION=https://api.yourdomain.com
+    command: sh -c "npm install --legacy-peer-deps && npm run build --workspace=intervo-widget && npm run build --workspace=intervo-frontend && npm exec --workspace=intervo-frontend -- next start"
     expose:
       - 3000
     depends_on:
@@ -46,24 +44,44 @@ services:
 
   # Backend (Node.js)
   backend:
-    build:
-      context: ./packages/intervo-backend
-      dockerfile: Dockerfile.prod
+    image: node:20-alpine
+    working_dir: /app/packages/intervo-backend
+    volumes:
+      - .:/app
+      - ../files/backend_node_modules:/app/packages/intervo-backend/node_modules
+      - ../files/backend_logs:/app/packages/intervo-backend/logs
+      - ../files/backend_uploads:/app/packages/intervo-backend/uploads
     environment:
       - NODE_ENV=production
-      - PORT=3003
       - MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin
-      - JWT_SECRET=${JWT_SECRET}
-      - FRONTEND_URL=https://app.yourdomain.com
-      - RAG_API_URL=http://rag-api:4003
-      # Add other production environment variables
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # Twilio Configuration
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
-    volumes:
-      - ../files/backend_logs:/app/logs
-      - ../files/backend_uploads:/app/uploads
+      - TWILIO_API_KEY=${TWILIO_API_KEY}
+      - TWILIO_API_SECRET=${TWILIO_API_SECRET}
+      - TWILIO_APP_SID=${TWILIO_APP_SID}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      # AI Services
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - AI_FLOW_API_KEY=${AI_FLOW_API_KEY}
+      # Speech Services
+      - ASSEMBLYAI_API_KEY=${ASSEMBLYAI_API_KEY}
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
+      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      # AWS Services
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      # Google Services
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    command: sh -c "npm install --legacy-peer-deps && npm start"
     expose:
       - 3003
     depends_on:
@@ -88,16 +106,17 @@ services:
 
   # RAG API (Python)
   rag-api:
-    build:
-      context: ./packages/intervo-backend/rag_py
-      dockerfile: Dockerfile.prod
+    image: python:3.11-slim
+    working_dir: /app/packages/intervo-backend/rag_py
+    volumes:
+      - .:/app
+      - ../files/rag_api_cache:/root/.cache
+      - ../files/vector_stores:/app/packages/intervo-backend/rag_py/vector_stores
     environment:
-      - PYTHONPATH=/app
+      - PYTHONPATH=/app/packages/intervo-backend
       - ENVIRONMENT=production
       - BACKEND_URL=http://backend:3003
-    volumes:
-      - ../files/rag_cache:/root/.cache
-      - ../files/vector_stores:/app/vector_stores
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python api.py"
     expose:
       - 4003
     networks:

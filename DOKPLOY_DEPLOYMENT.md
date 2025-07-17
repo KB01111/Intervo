@@ -1,6 +1,8 @@
-# Dokploy Deployment Guide for Intervo
+# Dokploy Deployment Guide for Intervo Open Source
 
-This guide provides step-by-step instructions for deploying the Intervo application on Dokploy with automatic domain setup and SSL certificates.
+This guide provides step-by-step instructions for deploying the Intervo Open Source application on Dokploy with automatic domain setup and SSL certificates.
+
+**Based on**: [Intervo Open Source Documentation](https://docs.intervo.ai/open-source/setup)
 
 ## 🚀 Quick Start
 
@@ -13,10 +15,12 @@ This guide provides step-by-step instructions for deploying the Intervo applicat
 
 - Dokploy server installed and running
 - Domain name with DNS management access
-- Environment variables configured
+- Environment variables configured (following open source structure)
+- FFmpeg installed on the server (for audio processing)
 
 ## 🔧 Step 1: Environment Configuration
 
+### Backend Environment
 1. Copy the environment template:
 ```bash
 cp .env.production.example .env.production
@@ -25,8 +29,23 @@ cp .env.production.example .env.production
 2. Edit `.env.production` and fill in your actual values:
    - Replace `yourdomain.com` with your actual domain
    - Add your API keys (OpenAI, Twilio, etc.)
-   - Set secure JWT and session secrets
+   - Set secure JWT and session secrets (minimum 32 characters)
    - Configure database credentials
+
+### Frontend Environment
+3. Configure frontend environment:
+```bash
+# Edit Intervo/packages/intervo-frontend/.env.production
+NODE_ENV=production
+NEXT_PUBLIC_API_URL_PRODUCTION=https://api.yourdomain.com
+```
+
+### Widget Environment
+4. Configure widget environment:
+```bash
+# Edit Intervo/packages/intervo-widget/.env.production
+VITE_API_URL_PRODUCTION=https://api.yourdomain.com
+```
 
 ## 🌐 Step 2: DNS Configuration
 
@@ -91,27 +110,31 @@ SSL certificates are automatically configured via Let's Encrypt through the Trae
 
 ## 🏗️ Architecture Overview
 
-The deployment creates the following services:
+The deployment creates the following services based on the open source structure:
 
 ### Frontend (app.yourdomain.com)
-- **Service**: Next.js application
+- **Service**: Next.js application (Node.js 20 Alpine)
 - **Port**: 3000 (internal)
 - **Features**: Static assets, SSR, client-side routing
+- **Build**: Includes widget build step
 
 ### Backend API (api.yourdomain.com)
-- **Service**: Node.js Express server
+- **Service**: Node.js Express server (Node.js 20 Alpine)
 - **Port**: 3003 (internal)
 - **Features**: REST API, authentication, business logic
+- **Development**: Uses nodemon for auto-restart
 
 ### RAG API (rag.yourdomain.com)
-- **Service**: Python FastAPI server
+- **Service**: Python FastAPI server (Python 3.11 Slim)
 - **Port**: 4003 (internal)
 - **Features**: AI/ML processing, vector search
+- **Dependencies**: Installed from requirements.txt
 
 ### Database (Internal Only)
-- **Service**: MongoDB
+- **Service**: MongoDB 7 (Jammy)
 - **Port**: 27017 (internal only)
 - **Features**: Data persistence, user management
+- **Credentials**: admin/password123 (change in production)
 
 ## 📁 File Structure
 

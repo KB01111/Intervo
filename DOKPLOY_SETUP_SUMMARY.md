@@ -1,18 +1,18 @@
-# Dokploy Deployment Setup - Summary
+# Dokploy Open Source Deployment Setup - Summary
 
 ## 📁 Files Created
 
-The following files have been created for your Dokploy deployment:
+The following files have been created for your Dokploy deployment based on the [Intervo Open Source Documentation](https://docs.intervo.ai/open-source/setup):
 
 ### Core Deployment Files
-- **`dokploy-docker-compose.yml`** - Main Docker Compose file optimized for Dokploy
-- **`.env.production.example`** - Production environment variables template
+- **`dokploy-docker-compose.yml`** - Docker Compose file optimized for Dokploy (follows open source structure)
+- **`.env.production.example`** - Production environment variables template (based on open source docs)
 - **`DOKPLOY_DEPLOYMENT.md`** - Comprehensive deployment guide
 
-### Production Dockerfiles
-- **`Dockerfile.frontend.prod`** - Multi-stage production build for Next.js frontend
-- **`packages/intervo-backend/Dockerfile.prod`** - Production build for Node.js backend
-- **`packages/intervo-backend/rag_py/Dockerfile.prod`** - Production build for Python RAG API
+### Environment Configuration Files
+- **`Intervo/packages/intervo-backend/.env.production`** - Backend environment variables
+- **`Intervo/packages/intervo-frontend/.env.production`** - Frontend environment variables
+- **`Intervo/packages/intervo-widget/.env.production`** - Widget environment variables
 
 ### Health Check Endpoints
 - **`Intervo/packages/intervo-frontend/src/app/api/health/route.js`** - Frontend health endpoint
@@ -59,11 +59,12 @@ The following files have been created for your Dokploy deployment:
 - HTTP to HTTPS redirects
 - Secure communication between services
 
-### Production Optimizations
-- Multi-stage Docker builds for smaller images
+### Open Source Optimizations
+- Uses Node.js 20 Alpine and Python 3.11 Slim images (matching open source setup)
+- Volume mounts for development-style deployment with persistence
 - Health checks for zero-downtime deployments
-- Proper volume mounts for data persistence
-- Production environment configurations
+- Production environment configurations following open source structure
+- Automatic widget build integration
 
 ### Dokploy Integration
 - Uses `dokploy-network` for internal communication
@@ -71,21 +72,23 @@ The following files have been created for your Dokploy deployment:
 - Proper volume structure with `../files/` mounts
 - Health checks for service monitoring
 
-## 🏗️ Architecture
+## 🏗️ Architecture (Open Source Structure)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend API   │    │   RAG API       │
-│ (Next.js:3000)  │    │ (Node.js:3003)  │    │ (Python:4003)   │
+│ (Node.js Alpine) │    │ (Node.js Alpine) │    │ (Python Slim)   │
+│ Next.js:3000    │    │ Express:3003    │    │ FastAPI:4003    │
 │ app.domain.com  │    │ api.domain.com  │    │ rag.domain.com  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  │
                     ┌─────────────────┐
-                    │    MongoDB      │
-                    │   (Internal)    │
+                    │    MongoDB 7    │
+                    │   (Jammy)       │
                     │    Port 27017   │
+                    │ admin/password123│
                     └─────────────────┘
 ```
 
@@ -97,27 +100,42 @@ The following files have been created for your Dokploy deployment:
 
 ## 📋 Environment Variables
 
-Key variables to configure in `.env.production`:
+Key variables to configure in `.env.production` (based on open source docs):
 
 ```env
-# Domains
-MAIN_DOMAIN=yourdomain.com
-APP_DOMAIN=app.yourdomain.com
-API_DOMAIN=api.yourdomain.com
-RAG_DOMAIN=rag.yourdomain.com
-
-# Security
-JWT_SECRET=your_secure_jwt_secret
-NEXTAUTH_SECRET=your_nextauth_secret
-SESSION_SECRET=your_session_secret
-
-# Database
+# Core Settings
+NODE_ENV=production
 MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin
 
-# API Keys
-OPENAI_API_KEY=your_openai_key
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
+# Security (REQUIRED - minimum 32 characters)
+SESSION_SECRET=your-super-secret-session-key-minimum-32-characters
+NEXTAUTH_SECRET=your-jwt-secret-key-minimum-32-characters
+ENCRYPTION_KEY=your-encryption-key-exactly-32-chars
+
+# Twilio (REQUIRED for phone functionality)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_API_KEY=SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_API_SECRET=your-twilio-api-secret
+TWILIO_APP_SID=APxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_PHONE_NUMBER=+1234567890
+
+# AI Services (REQUIRED)
+OPENAI_API_KEY=sk-your-openai-api-key
+GROQ_API_KEY=gsk_your-groq-api-key
+
+# Speech Services (REQUIRED)
+ASSEMBLYAI_API_KEY=your-assemblyai-api-key
+AZURE_SPEECH_KEY=your-azure-speech-key
+ELEVENLABS_API_KEY=your-elevenlabs-api-key
+
+# AWS Services (REQUIRED)
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+# Google Services (REQUIRED)
+GOOGLE_CLIENT_ID=your-google-client-id.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 ## 🚨 Important Notes
