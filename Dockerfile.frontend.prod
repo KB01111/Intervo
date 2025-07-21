@@ -11,8 +11,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY packages/intervo-frontend/package.json ./packages/intervo-frontend/
 COPY packages/intervo-widget/package.json ./packages/intervo-widget/
+COPY packages/intervo-backend/package.json ./packages/intervo-backend/
 
-RUN npm ci --legacy-peer-deps
+RUN npm ci --legacy-peer-deps --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder

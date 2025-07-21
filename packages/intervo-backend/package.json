@@ -48,6 +48,7 @@
     "rnnoise-wasm": "^0.0.1-security",
     "stripe": "^18.1.0",
     "twilio": "^5.3.5",
+    "uuid": "^11.0.5",
     "wav": "^1.0.2",
     "ws": "^8.18.0"
   }
