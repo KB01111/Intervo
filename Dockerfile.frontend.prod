@@ -21,7 +21,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the widget first
+# Build the widget first - ensure all dependencies are available
+RUN npm install --workspace=intervo-widget
 RUN npm run build --workspace=intervo-widget
 
 # Build the frontend

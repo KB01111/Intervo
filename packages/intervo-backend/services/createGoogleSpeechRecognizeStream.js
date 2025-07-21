@@ -1,11 +1,16 @@
 const speech = require("@google-cloud/speech");
 const WebSocket = require("ws");
 const path = require('path');
-process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(
-  process.cwd(),
-  process.env.GOOGLE_CREDENTIALS_DIR,
-  process.env.GOOGLE_CREDENTIALS_FILENAME
-);
+
+// Only set Google credentials if the environment variables are provided
+if (process.env.GOOGLE_CREDENTIALS_DIR && process.env.GOOGLE_CREDENTIALS_FILENAME) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(
+    process.cwd(),
+    process.env.GOOGLE_CREDENTIALS_DIR,
+    process.env.GOOGLE_CREDENTIALS_FILENAME
+  );
+}
+
 const client = new speech.SpeechClient({});
 
 function createGoogleSpeechRecognizeStream({ 
