@@ -1,0 +1,57 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL_PRODUCTION=https://${domain}
+    command: sh -c "npm install && cd packages/intervo-frontend && npm install && npm run build && npm start"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: node:20-alpine
+    working_dir: /app/packages/intervo-backend
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin
+      - SESSION_SECRET=${session_secret}
+      - NEXTAUTH_SECRET=${nextauth_secret}
+      - ENCRYPTION_KEY=${encryption_key}
+      - OPENAI_API_KEY=${openai_api_key}
+      - GROQ_API_KEY=${groq_api_key}
+    command: sh -c "npm install && npm start"
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  rag-api:
+    image: python:3.11-slim
+    working_dir: /app/packages/intervo-backend/rag_py
+    volumes:
+      - .:/app
+      - rag_api_cache:/root/.cache
+    environment:
+      - PYTHONPATH=/app/packages/intervo-backend
+      - ENVIRONMENT=production
+      - BACKEND_URL=http://backend:3003
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python api.py"
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  rag_api_cache:
