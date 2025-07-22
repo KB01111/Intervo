@@ -12,16 +12,16 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import uvicorn
-from rag_py.rag_service import RagTrainer, RagQuery # Absolute import
+from rag_service import RagTrainer, RagQuery # Local import
 import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 import shutil
-from rag_py.storage import S3Storage, DocumentType # Absolute import
+from storage import S3Storage, DocumentType # Local import
 import json
 from datetime import datetime
-from rag_py.crawler import WebCrawler # Absolute import
+from crawler import WebCrawler # Local import
 import mammoth
 import pdfplumber
 import io
