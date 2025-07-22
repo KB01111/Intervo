@@ -1,10 +1,13 @@
 import sys
 import os
 
-# Add the parent directory of rag_py to sys.path to allow absolute imports from rag_py
-# This should be the very first thing the script does.
+# Add the current directory and parent directory to sys.path for imports
 _current_file_directory = os.path.dirname(os.path.abspath(__file__))
 _parent_directory = os.path.dirname(_current_file_directory)
+
+# Add both current and parent directories to path
+if _current_file_directory not in sys.path:
+    sys.path.insert(0, _current_file_directory)
 if _parent_directory not in sys.path:
     sys.path.insert(0, _parent_directory)
 
@@ -1412,4 +1415,6 @@ async def get_knowledgebase_chunks(knowledgebase_id: str):
         )
 
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="0.0.0.0", port=4003, reload=True) 
+    # Use start_api.py for production startup with dependency checking
+    import uvicorn
+    uvicorn.run("api:app", host="0.0.0.0", port=4003, reload=True)

@@ -13,10 +13,8 @@ RUN apt-get update && apt-get install -y \
 COPY packages/intervo-backend/rag_py/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the RAG API source code
+# Copy the entire RAG API directory structure
 COPY packages/intervo-backend/rag_py/ ./
-COPY packages/intervo-backend/storage.py ./
-COPY packages/intervo-backend/crawler.py ./
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' ragapi
@@ -25,4 +23,4 @@ USER ragapi
 
 EXPOSE 4003
 
-CMD ["python", "api.py"]
+CMD ["python", "start_api.py"]
