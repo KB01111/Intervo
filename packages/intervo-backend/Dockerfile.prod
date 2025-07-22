@@ -42,8 +42,8 @@ COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --chown=nodejs:nodejs . .
 
 # Create necessary directories
-RUN mkdir -p logs uploads vector_stores
-RUN chown -R nodejs:nodejs logs uploads vector_stores
+RUN mkdir -p logs uploads vector_stores public/transcripts
+RUN chown -R nodejs:nodejs logs uploads vector_stores public
 
 USER nodejs
 
