@@ -27,17 +27,6 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.intervo-frontend.rule=Host(`app.atlas-agent.net`)
-      - traefik.http.routers.intervo-frontend.entrypoints=websecure
-      - traefik.http.routers.intervo-frontend.tls=true
-      - traefik.http.services.intervo-frontend.loadbalancer.server.port=3000
-      # Redirect HTTP to HTTPS
-      - traefik.http.routers.intervo-frontend-http.rule=Host(`app.atlas-agent.net`)
-      - traefik.http.routers.intervo-frontend-http.entrypoints=web
-      - traefik.http.routers.intervo-frontend-http.middlewares=redirect-to-https
-      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
 
   # Backend (Node.js)
   backend:
@@ -99,20 +88,6 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.intervo-backend.rule=Host(`api.atlas-agent.net`)
-      - traefik.http.routers.intervo-backend.entrypoints=websecure
-      - traefik.http.routers.intervo-backend.tls=true
-      - traefik.http.services.intervo-backend.loadbalancer.server.port=3003
-      # Redirect HTTP to HTTPS
-      - traefik.http.routers.intervo-backend-http.rule=Host(`api.atlas-agent.net`)
-      - traefik.http.routers.intervo-backend-http.entrypoints=web
-      - traefik.http.routers.intervo-backend-http.middlewares=redirect-to-https
-      # Health check
-      - traefik.http.routers.intervo-backend.service=intervo-backend
-      - traefik.http.services.intervo-backend.loadbalancer.healthcheck.path=/health
-      - traefik.http.services.intervo-backend.loadbalancer.healthcheck.interval=30s
 
   # RAG API (Python)
   rag-api:
@@ -131,16 +106,6 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.intervo-rag.rule=Host(`rag.atlas-agent.net`)
-      - traefik.http.routers.intervo-rag.entrypoints=websecure
-      - traefik.http.routers.intervo-rag.tls=true
-      - traefik.http.services.intervo-rag.loadbalancer.server.port=4003
-      # Redirect HTTP to HTTPS
-      - traefik.http.routers.intervo-rag-http.rule=Host(`rag.atlas-agent.net`)
-      - traefik.http.routers.intervo-rag-http.entrypoints=web
-      - traefik.http.routers.intervo-rag-http.middlewares=redirect-to-https
 
 networks:
   dokploy-network:
