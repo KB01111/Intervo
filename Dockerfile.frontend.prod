@@ -43,17 +43,20 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the built application
-COPY --from=builder /app/packages/intervo-frontend/public ./public
+# Copy the built application (non-standalone mode)
+COPY --from=builder /app/packages/intervo-frontend/.next ./packages/intervo-frontend/.next
+COPY --from=builder /app/packages/intervo-frontend/public ./packages/intervo-frontend/public
+COPY --from=builder /app/packages/intervo-frontend/package*.json ./packages/intervo-frontend/
+COPY --from=builder /app/packages/intervo-frontend/next.config.mjs ./packages/intervo-frontend/
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Copy widget build
+COPY --from=builder /app/packages/intervo-widget/dist ./packages/intervo-widget/dist
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/packages/intervo-frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/packages/intervo-frontend/.next/static ./packages/intervo-frontend/.next/static
+# Copy node_modules for production dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Change ownership
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -66,4 +69,5 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["node", "packages/intervo-frontend/server.js"]
+WORKDIR /app/packages/intervo-frontend
+CMD ["npm", "start"]
