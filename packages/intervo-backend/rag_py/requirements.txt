@@ -4,13 +4,14 @@ uvicorn[standard]==0.24.0
 pydantic==2.5.0
 python-multipart==0.0.6
 
-# LangChain and AI dependencies
-langchain==0.1.0
-langchain-core>=0.1.7
-langchain-community==0.0.10
-langchain-openai==0.0.2
+# LangChain and AI dependencies - using compatible versions
+langchain==0.1.20
+langchain-core==0.1.52
+langchain-community==0.0.38
+langchain-openai==0.1.8
 langchain-text-splitters==0.0.1
 langchain-voyageai==0.1.0
+langsmith>=0.1.0,<0.2.0
 
 # Vector store and embeddings
 faiss-cpu==1.7.4
