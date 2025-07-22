@@ -1,0 +1,28 @@
+# RAG API Dockerfile for production
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY packages/intervo-backend/rag_py/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the RAG API source code
+COPY packages/intervo-backend/rag_py/ ./
+COPY packages/intervo-backend/storage.py ./
+COPY packages/intervo-backend/crawler.py ./
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' ragapi
+RUN chown -R ragapi:ragapi /app
+USER ragapi
+
+EXPOSE 4003
+
+CMD ["python", "api.py"]
