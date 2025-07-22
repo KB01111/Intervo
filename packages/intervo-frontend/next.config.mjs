@@ -9,7 +9,8 @@ const nextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, "src/styles")],
   },
-  output: "standalone",
+  // Temporarily disable standalone to fix build issues
+  // output: "standalone",
   async rewrites() {
     return [
       {

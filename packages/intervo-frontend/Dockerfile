@@ -32,19 +32,25 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the standalone build
-COPY --from=builder /app/packages/intervo-frontend/.next/standalone ./
-COPY --from=builder /app/packages/intervo-frontend/.next/static ./packages/intervo-frontend/.next/static
+# Copy the built application
+COPY --from=builder /app/packages/intervo-frontend/.next ./packages/intervo-frontend/.next
 COPY --from=builder /app/packages/intervo-frontend/public ./packages/intervo-frontend/public
+COPY --from=builder /app/packages/intervo-frontend/package*.json ./packages/intervo-frontend/
+COPY --from=builder /app/packages/intervo-frontend/next.config.mjs ./packages/intervo-frontend/
 
 # Copy widget build
 COPY --from=builder /app/packages/intervo-widget/dist ./packages/intervo-widget/dist
+
+# Copy node_modules for production dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Change ownership
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -53,4 +59,5 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "packages/intervo-frontend/server.js"]
+WORKDIR /app/packages/intervo-frontend
+CMD ["npm", "start"]

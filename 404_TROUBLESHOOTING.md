@@ -1,13 +1,18 @@
-# 🔧 404 Error Troubleshooting Guide
+# 🔧 Build & 404 Error Troubleshooting Guide
 
 ## ✅ Issues Fixed
 
-### 1. **Missing Root Page**
+### 1. **Next.js Standalone Build Errors**
+- **Problem**: ENOENT copyfile errors with route groups and standalone build
+- **Solution**: ✅ Disabled standalone mode, created simple Dockerfile
+- **Impact**: Build completes without file copying errors
+
+### 2. **Missing Root Page**
 - **Problem**: No `page.js` in root `src/app` directory
 - **Solution**: ✅ Created `packages/intervo-frontend/src/app/page.js`
 - **Impact**: Provides a working root route that redirects to login
 
-### 2. **Build Process Issues**
+### 3. **Build Process Issues**
 - **Problem**: Widget must be built before frontend
 - **Solution**: ✅ Created `build-all.sh` comprehensive build script
 - **Impact**: Ensures correct build order and dependencies
