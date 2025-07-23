@@ -1,6 +1,6 @@
 import { AuthProvider } from "@/context/AuthContext";
 
-export default function LoginLayout({ children }) {
+export default function SignupLayout({ children }) {
   return (
     <AuthProvider>
       {children}
