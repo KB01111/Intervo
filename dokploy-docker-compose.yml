@@ -16,7 +16,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend.prod
+      dockerfile: Dockerfile.dokploy
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL_PRODUCTION=https://api.atlas-agent.net
