@@ -27,6 +27,18 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      # HTTP router (redirects to HTTPS)
+      - traefik.http.routers.frontend-app.rule=Host(`app.atlas-agent.net`)
+      - traefik.http.routers.frontend-app.entrypoints=web
+      - traefik.http.routers.frontend-app.middlewares=redirect-to-https
+      # HTTPS router
+      - traefik.http.routers.frontend-app-secure.rule=Host(`app.atlas-agent.net`)
+      - traefik.http.routers.frontend-app-secure.entrypoints=websecure
+      - traefik.http.routers.frontend-app-secure.tls.certresolver=letsencrypt
+      # Service configuration
+      - traefik.http.services.frontend-app.loadbalancer.server.port=3000
 
   # Backend (Node.js)
   backend:
@@ -88,6 +100,18 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      # HTTP router (redirects to HTTPS)
+      - traefik.http.routers.backend-app.rule=Host(`api.atlas-agent.net`)
+      - traefik.http.routers.backend-app.entrypoints=web
+      - traefik.http.routers.backend-app.middlewares=redirect-to-https
+      # HTTPS router
+      - traefik.http.routers.backend-app-secure.rule=Host(`api.atlas-agent.net`)
+      - traefik.http.routers.backend-app-secure.entrypoints=websecure
+      - traefik.http.routers.backend-app-secure.tls.certresolver=letsencrypt
+      # Service configuration
+      - traefik.http.services.backend-app.loadbalancer.server.port=3003
 
   # RAG API (Python)
   rag-api:
@@ -106,6 +130,18 @@ services:
     networks:
       - dokploy-network
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      # HTTP router (redirects to HTTPS)
+      - traefik.http.routers.rag-app.rule=Host(`rag.atlas-agent.net`)
+      - traefik.http.routers.rag-app.entrypoints=web
+      - traefik.http.routers.rag-app.middlewares=redirect-to-https
+      # HTTPS router
+      - traefik.http.routers.rag-app-secure.rule=Host(`rag.atlas-agent.net`)
+      - traefik.http.routers.rag-app-secure.entrypoints=websecure
+      - traefik.http.routers.rag-app-secure.tls.certresolver=letsencrypt
+      # Service configuration
+      - traefik.http.services.rag-app.loadbalancer.server.port=4003
 
 networks:
   dokploy-network:
