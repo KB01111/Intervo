@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from dotenv import load_dotenv
 from langchain_deepseek import ChatDeepSeek
 from langchain_core.messages import BaseMessage
-from rag_py.llm_services.base import BaseLLMService
+from .base import BaseLLMService
 
 class DeepSeekService(BaseLLMService):
     """DeepSeek LLM service implementation."""

@@ -1,11 +1,11 @@
 from typing import Dict, Any, Optional
 from enum import Enum
 
-from rag_py.llm_services.base import BaseLLMService
-from rag_py.llm_services.openai_service import OpenAIService
-from rag_py.llm_services.gemini_service import GeminiService
-from rag_py.llm_services.groq_service import GroqService
-from rag_py.llm_services.deepseek_service import DeepSeekService
+from .base import BaseLLMService
+from .openai_service import OpenAIService
+from .gemini_service import GeminiService
+from .groq_service import GroqService
+from .deepseek_service import DeepSeekService
 
 class LLMServiceType(Enum):
     """Supported LLM service types."""
