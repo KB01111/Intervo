@@ -13,8 +13,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_voyageai import VoyageAIRerank
 from langchain.retrievers import ContextualCompressionRetriever
-from rag_py.llm_services.factory import LLMServiceFactory, LLMServiceType
-from rag_py.llm_services.base import BaseLLMService
+from llm_services.factory import LLMServiceFactory, LLMServiceType
+from llm_services.base import BaseLLMService
 
 # Configure logging
 logging.basicConfig(

@@ -122,7 +122,7 @@ services:
       - ../files/rag_api_cache:/app/.cache
       - ../files/vector_stores:/app/vector_stores
     environment:
-      - PYTHONPATH=/app
+      - PYTHONPATH=/app:/app/rag_py
       - ENVIRONMENT=production
       - BACKEND_URL=http://backend:3003
     expose:

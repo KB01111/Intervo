@@ -31,8 +31,8 @@ import io
 from bs4 import BeautifulSoup
 from langchain_community.vectorstores import FAISS # Added import for FAISS
 
-# Import the new RAG Enhancement Service using absolute import
-from rag_py.rag_enhancements import RAGEnhancementService # Absolute import
+# Import the new RAG Enhancement Service using local import
+from rag_enhancements import RAGEnhancementService # Local import
 
 # Configure logging
 logging.basicConfig(

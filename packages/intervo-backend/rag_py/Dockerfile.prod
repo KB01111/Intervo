@@ -4,7 +4,6 @@ FROM python:3.11-slim AS base
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -17,6 +16,7 @@ RUN apt-get update && apt-get install -y \
 RUN groupadd --gid 1001 appuser && \
     useradd --uid 1001 --gid appuser --shell /bin/bash --create-home appuser
 
+# Set up the directory structure to match the expected imports
 WORKDIR /app
 
 # Copy requirements first for better caching
@@ -26,11 +26,17 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Create the rag_py directory structure
+RUN mkdir -p rag_py
+
+# Copy application code to the rag_py directory
+COPY . rag_py/
+
+# Set PYTHONPATH to include both /app and /app/rag_py
+ENV PYTHONPATH=/app:/app/rag_py
 
 # Create necessary directories
-RUN mkdir -p vector_stores logs
+RUN mkdir -p vector_stores logs rag_py/vector_stores rag_py/logs
 RUN chown -R appuser:appuser /app
 
 USER appuser
@@ -41,4 +47,6 @@ EXPOSE 4003
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:4003/health || exit 1
 
-CMD ["python", "api.py"]
+# Change to rag_py directory and run the API
+WORKDIR /app/rag_py
+CMD ["python", "start_api.py"]
