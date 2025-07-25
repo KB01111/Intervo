@@ -1,4 +1,6 @@
 // Simple test page to verify routing works
+import Link from 'next/link';
+
 export default function TestPage() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -13,9 +15,9 @@ export default function TestPage() {
         </ul>
       </div>
       <div style={{ marginTop: '20px' }}>
-        <a href="/login" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+        <Link href="/login" style={{ color: '#0070f3', textDecoration: 'underline' }}>
           Go to Login Page
-        </a>
+        </Link>
       </div>
     </div>
   );
