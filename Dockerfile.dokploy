@@ -47,6 +47,7 @@ COPY --from=builder /app/packages/intervo-frontend/.next ./packages/intervo-fron
 COPY --from=builder /app/packages/intervo-frontend/public ./packages/intervo-frontend/public
 COPY --from=builder /app/packages/intervo-frontend/package*.json ./packages/intervo-frontend/
 COPY --from=builder /app/packages/intervo-frontend/next.config.mjs ./packages/intervo-frontend/
+COPY --from=builder /app/packages/intervo-frontend/src ./packages/intervo-frontend/src
 
 # Copy widget build
 COPY --from=builder /app/packages/intervo-widget/dist ./packages/intervo-widget/dist
