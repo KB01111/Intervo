@@ -1,0 +1,130 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7-jammy
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - ../files/mongodb_data:/data/db
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+    # No external access needed - internal only
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dokploy
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL_PRODUCTION=https://api.atlas-agent.net
+    expose:
+      - 3000
+    depends_on:
+      - backend
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intervo-frontend.rule=Host(`app.atlas-agent.net`)"
+      - "traefik.http.routers.intervo-frontend.entrypoints=websecure"
+      - "traefik.http.routers.intervo-frontend.tls.certResolver=letsencrypt"
+      - "traefik.http.services.intervo-frontend.loadbalancer.server.port=3000"
+
+  # Backend (Node.js)
+  backend:
+    build:
+      context: ./packages/intervo-backend
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ../files/backend_logs:/app/logs
+      - ../files/backend_uploads:/app/uploads
+      - ../files/vector_stores:/app/vector_stores
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin
+      - SESSION_SECRET=${SESSION_SECRET}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # Supabase Configuration
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      # Application URLs
+      - BASE_URL=${BASE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - RAG_API_URL=${RAG_API_URL}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      # Twilio Configuration
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_API_KEY=${TWILIO_API_KEY}
+      - TWILIO_API_SECRET=${TWILIO_API_SECRET}
+      - TWILIO_APP_SID=${TWILIO_APP_SID}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      # AI Services
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - AI_FLOW_API_KEY=${AI_FLOW_API_KEY}
+      # Speech Services
+      - ASSEMBLYAI_API_KEY=${ASSEMBLYAI_API_KEY}
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
+      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      # AWS Services
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      # Google Services
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CREDENTIALS_DIR=${GOOGLE_CREDENTIALS_DIR:-}
+      - GOOGLE_CREDENTIALS_FILENAME=${GOOGLE_CREDENTIALS_FILENAME:-}
+
+    expose:
+      - 3003
+    depends_on:
+      - mongodb
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intervo-backend.rule=Host(`api.atlas-agent.net`)"
+      - "traefik.http.routers.intervo-backend.entrypoints=websecure"
+      - "traefik.http.routers.intervo-backend.tls.certResolver=letsencrypt"
+      - "traefik.http.services.intervo-backend.loadbalancer.server.port=3003"
+
+  # RAG API (Python)
+  rag-api:
+    build:
+      context: ./packages/intervo-backend/rag_py
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ../files/rag_api_cache:/app/.cache
+      - ../files/vector_stores:/app/vector_stores
+    environment:
+      - PYTHONPATH=/app:/app/rag_py
+      - ENVIRONMENT=production
+      - BACKEND_URL=http://backend:3003
+    expose:
+      - 4003
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intervo-rag.rule=Host(`rag.atlas-agent.net`)"
+      - "traefik.http.routers.intervo-rag.entrypoints=websecure"
+      - "traefik.http.routers.intervo-rag.tls.certResolver=letsencrypt"
+      - "traefik.http.services.intervo-rag.loadbalancer.server.port=4003"
+
+networks:
+  dokploy-network:
+    external: true
