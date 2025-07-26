@@ -1,0 +1,42 @@
+# Simple Frontend Dockerfile - avoids standalone build issues
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+RUN apk add --no-cache libc6-compat
+
+# Copy package files
+COPY package*.json ./
+COPY packages/intervo-frontend/package*.json ./packages/intervo-frontend/
+COPY packages/intervo-widget/package*.json ./packages/intervo-widget/
+
+# Install all dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Build widget first
+RUN npm run build --workspace=intervo-widget
+
+# Build frontend
+RUN npm run build --workspace=intervo-frontend
+
+# Set environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Create user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3000
+
+WORKDIR /app/packages/intervo-frontend
+CMD ["npm", "start"]

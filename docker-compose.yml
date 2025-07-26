@@ -24,7 +24,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-    command: sh -c "npm install --legacy-peer-deps && npm run build --workspace=intervo-widget && npm exec --workspace=intervo-frontend -- next dev"
+    command: sh -c "npm install --legacy-peer-deps && npm run build --workspace=intervo-widget && npm exec --workspace=intervo-frontend -- next dev -H 0.0.0.0"
     networks:
       - intervo-network
     restart: unless-stopped
@@ -37,7 +37,7 @@ services:
       - .:/app
       - backend_node_modules:/app/packages/intervo-backend/node_modules
     ports:
-      - "3001:3003"
+      - "3003:3003"
     environment:
       - NODE_ENV=development
       - MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin
@@ -60,7 +60,7 @@ services:
     environment:
       - PYTHONPATH=/app/packages/intervo-backend
       - ENVIRONMENT=development
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && python api.py"
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python start_api.py"
     networks:
       - intervo-network
     restart: unless-stopped

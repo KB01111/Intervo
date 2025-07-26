@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "clean": "rm -rf dist",
-    "build": "npm run clean && VITE_BUILD_FORMAT=umd vite build && VITE_BUILD_FORMAT=es vite build",
+    "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
+    "build": "npm run clean && npx cross-env VITE_BUILD_FORMAT=umd npx vite build && npx cross-env VITE_BUILD_FORMAT=es npx vite build",
+    "build:umd": "npx cross-env VITE_BUILD_FORMAT=umd npx vite build",
+    "build:es": "npx cross-env VITE_BUILD_FORMAT=es npx vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -54,12 +56,14 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "postcss": "^8.5.1",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.1",
     "vite": "^6.0.5"
   },

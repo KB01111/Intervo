@@ -1,0 +1,26 @@
+[variables]
+domain = "${domain}"
+session_secret = "${password:32}"
+nextauth_secret = "${password:32}"
+encryption_key = "${password:32}"
+openai_api_key = "sk-your-openai-api-key"
+groq_api_key = "gsk_your-groq-api-key"
+
+[config]
+[[config.domains]]
+serviceName = "frontend"
+port = 3000
+host = "${domain}"
+
+[[config.domains]]
+serviceName = "backend"
+port = 3003
+host = "${domain}"
+
+[[config.domains]]
+serviceName = "rag-api"
+port = 4003
+host = "${domain}"
+
+env = []
+mounts = []

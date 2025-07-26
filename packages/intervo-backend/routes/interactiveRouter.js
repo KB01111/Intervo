@@ -21,7 +21,12 @@ const audioChunks = new Map();
 // Add this before processing any requests
 const transcriptDir = path.join('public', 'transcripts');
 if (!fs.existsSync(transcriptDir)){
-    fs.mkdirSync(transcriptDir, { recursive: true });
+    try {
+        fs.mkdirSync(transcriptDir, { recursive: true });
+    } catch (error) {
+        console.warn('Warning: Could not create transcripts directory:', error.message);
+        // Continue without creating the directory - it should exist from Docker build
+    }
 }
 
 router.post("/", async (req, res) => {

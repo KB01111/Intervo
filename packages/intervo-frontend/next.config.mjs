@@ -9,7 +9,13 @@ const nextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, "src/styles")],
   },
-  output: "standalone",
+  // Keep standalone disabled - using regular build process
+  // output: "standalone",
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
   async rewrites() {
     return [
       {

@@ -1,0 +1,21 @@
+{
+  "name": "Intervo AI Platform",
+  "description": "Complete AI-powered conversation platform with frontend, backend, and RAG API services",
+  "version": "1.0.0",
+  "logo": "https://raw.githubusercontent.com/KB01111/Intervo/main/logo.png",
+  "tags": [
+    "ai",
+    "chat",
+    "conversation",
+    "rag",
+    "nextjs",
+    "nodejs",
+    "python"
+  ],
+  "links": {
+    "github": "https://github.com/KB01111/Intervo",
+    "docs": "https://docs.intervo.ai"
+  },
+  "compose": "services:\n  mongodb:\n    image: mongo:7-jammy\n    environment:\n      - MONGO_INITDB_ROOT_USERNAME=admin\n      - MONGO_INITDB_ROOT_PASSWORD=password123\n    volumes:\n      - mongodb_data:/data/db\n    restart: unless-stopped\n\n  frontend:\n    image: node:20-alpine\n    working_dir: /app\n    volumes:\n      - .:/app\n    environment:\n      - NODE_ENV=production\n      - NEXT_PUBLIC_API_URL_PRODUCTION=https://${domain}\n    command: sh -c \"npm install && cd packages/intervo-frontend && npm install && npm run build && npm start\"\n    depends_on:\n      - backend\n    restart: unless-stopped\n\n  backend:\n    image: node:20-alpine\n    working_dir: /app/packages/intervo-backend\n    volumes:\n      - .:/app\n    environment:\n      - NODE_ENV=production\n      - MONGO_URI=mongodb://admin:password123@mongodb:27017/intervo?authSource=admin\n      - SESSION_SECRET=${session_secret}\n      - NEXTAUTH_SECRET=${nextauth_secret}\n      - ENCRYPTION_KEY=${encryption_key}\n      - OPENAI_API_KEY=${openai_api_key}\n      - GROQ_API_KEY=${groq_api_key}\n    command: sh -c \"npm install && npm start\"\n    depends_on:\n      - mongodb\n    restart: unless-stopped\n\n  rag-api:\n    image: python:3.11-slim\n    working_dir: /app/packages/intervo-backend/rag_py\n    volumes:\n      - .:/app\n      - rag_api_cache:/root/.cache\n    environment:\n      - PYTHONPATH=/app/packages/intervo-backend\n      - ENVIRONMENT=production\n      - BACKEND_URL=http://backend:3003\n    command: sh -c \"pip install --no-cache-dir -r requirements.txt && python api.py\"\n    restart: unless-stopped\n\nvolumes:\n  mongodb_data:\n  rag_api_cache:\n",
+  "template": "[variables]\ndomain = \"${domain}\"\nsession_secret = \"${password:32}\"\nnextauth_secret = \"${password:32}\"\nencryption_key = \"${password:32}\"\nopenai_api_key = \"sk-your-openai-api-key\"\ngroq_api_key = \"gsk_your-groq-api-key\"\n\n[config]\n[[config.domains]]\nserviceName = \"frontend\"\nport = 3000\nhost = \"${domain}\"\n\n[[config.domains]]\nserviceName = \"backend\"\nport = 3003\nhost = \"${domain}\"\n\n[[config.domains]]\nserviceName = \"rag-api\"\nport = 4003\nhost = \"${domain}\"\n\nenv = []\nmounts = []\n"
+}
